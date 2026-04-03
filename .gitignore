@@ -52,3 +52,11 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+NetworkThing/Directory.Packages.props
+/NetworkThing/NetworkThing.Android
+/NetworkThing/NetworkThing.Browser
+/NetworkThing/NetworkThing.Desktop
+/NetworkThingAPI/NetworkThingAPI/.idea
+NetworkThingAPI/NetworkThingAPI/appsettings.json
+NetworkThingAPI/NetworkThingAPI/appsettings.Development.json
+NetworkThingAPI/NetworkThingAPI/Properties/launchSettings.json
