@@ -5,7 +5,7 @@ using NetworkThingAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-string folderPath = @"D:\Projects\Avalonia UI projects\Full App Projects\NetworkThing\Network Thing\NetworkThingAPI\NetworkThingAPI\FilesDir";
+string folderPath = builder.Configuration.GetValue<string>("FolderPath")!;
 
 
 builder.Services.AddOpenApi();
@@ -53,10 +53,11 @@ fileApi.MapPost("/", async (IFormFile file, IHubContext<FileHub> hubContext) =>
     if (file.Length > 0)
     {
         var filePath = Path.Combine(folderPath, file.FileName);
+
         using var stream = File.Create(filePath);
         await file.CopyToAsync(stream);
-
         await hubContext.Clients.All.SendAsync("FileUploaded");
+
         return;
     }
     Console.WriteLine("Error");

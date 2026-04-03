@@ -34,7 +34,6 @@ public partial class MainViewModel : ViewModelBase
 
         connection.On("FileUploaded", async () =>
         {
-            Console.WriteLine("A file has been uploaded");
             await GetFiles();
         });
         
@@ -57,9 +56,17 @@ public partial class MainViewModel : ViewModelBase
         if (fileResult != null)
         {
             using var stream = await fileResult.OpenWriteAsync();
-            
-            var response = await client.GetStreamAsync($"http://localhost:5080/api/v1/files/{name}");
-            await response.CopyToAsync(stream);
+
+            try
+            {
+                Stream response = await client.GetStreamAsync($"http://localhost:5080/api/v1/files/{name}");
+                await response.CopyToAsync(stream);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 
@@ -76,6 +83,11 @@ public partial class MainViewModel : ViewModelBase
             AllowMultiple = false
         });
 
+        if (files == null || files.Count == 0)
+        {
+            return;
+        }
+        
         var file = files[0];
         
         using var fileStream = await file.OpenReadAsync();
@@ -84,14 +96,30 @@ public partial class MainViewModel : ViewModelBase
         var streamContent = new StreamContent(fileStream);
         
         content.Add(streamContent, "file", file.Name);
-        
-        await client.PostAsync("http://localhost:5080/api/v1/files", content);
+
+        try
+        {
+            await client.PostAsync("http://localhost:5080/api/v1/files", content);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public async Task InitializeAsync()
     {
-        await connection.StartAsync();
-        await GetFiles();
+        try
+        {
+            await connection.StartAsync();
+            await GetFiles();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
     public async Task GetFiles()
