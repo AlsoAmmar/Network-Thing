@@ -1,10 +1,12 @@
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using NetworkThingAPI.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-string filePath = @"D:\Projects\Avalonia UI projects\Full App Projects\NetworkThing\Network Thing\NetworkThingAPI\NetworkThingAPI\FilesDir";
-DirectoryInfo directoryInfo = new DirectoryInfo(filePath);
-FileInfo[] fileInfos = directoryInfo.GetFiles();
+string folderPath = @"D:\Projects\Avalonia UI projects\Full App Projects\NetworkThing\Network Thing\NetworkThingAPI\NetworkThingAPI\FilesDir";
+
 
 builder.Services.AddOpenApi();
 builder.Services.AddSignalR();
@@ -26,6 +28,9 @@ fileApi.MapGet("/", () =>
 {
     List<FileModel> files = new List<FileModel>();
 
+    DirectoryInfo directoryInfo = new DirectoryInfo(folderPath);
+    FileInfo[] fileInfos = directoryInfo.GetFiles();
+
     foreach(FileInfo file in fileInfos)
     {
         files.Add(new FileModel(file));
@@ -35,5 +40,26 @@ fileApi.MapGet("/", () =>
     Console.WriteLine("Got");
     return Results.Ok(files);
 });
+
+fileApi.MapGet("/{name}", (string name) =>
+{
+    var filePath = Path.Combine(folderPath, name);
+
+    return Results.File(filePath, contentType: "application/octet-stream", fileDownloadName: name);
+});
+
+fileApi.MapPost("/", async (IFormFile file, IHubContext<FileHub> hubContext) =>
+{
+    if (file.Length > 0)
+    {
+        var filePath = Path.Combine(folderPath, file.FileName);
+        using var stream = File.Create(filePath);
+        await file.CopyToAsync(stream);
+
+        await hubContext.Clients.All.SendAsync("FileUploaded");
+        return;
+    }
+    Console.WriteLine("Error");
+}).DisableAntiforgery();
 
 app.Run();
