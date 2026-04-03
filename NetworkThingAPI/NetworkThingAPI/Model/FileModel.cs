@@ -1,14 +1,27 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Text.Json.Serialization;
 
-namespace NetworkThing.Models;
+namespace NetworkThingAPI.Models;
 
-public partial class FileModel : ObservableObject
-{
-    [ObservableProperty]
-    private string fileName;
-
-    public FileModel(string name)
+public class FileModel
+{   
+    public enum FileTypes
     {
-        FileName = name;
+        Image,
+        Document,
+        Other
+    }
+    
+    public string FileName { get; set; }
+    public FileTypes FileType { get; set; }
+
+    public FileModel(FileInfo info)
+    {
+        FileName = info.Name;
+        FileType = info.Extension.ToLower() switch
+        {
+            ".txt" => FileTypes.Document,
+            ".png" or ".jpg" => FileTypes.Image,
+            _ => FileTypes.Other
+        };
     }
 }

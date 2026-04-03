@@ -28,7 +28,7 @@
                       <DataTemplate x:DataType="model:FileModel">
                           <Grid ColumnDefinitions="Auto, *, Auto">
                               <StackPanel Grid.Column="0" Orientation="Horizontal">
-                                  <Image Source="../Assets/Images/Document.png"
+                                  <Image Source="{Binding IconBitmap}"
                                          Height="30"/>
                                   <Separator/>
                               </StackPanel>
